@@ -1240,8 +1240,8 @@ export async function handleServerDetail(request, env, sys, viewId) {
       fetchCurrentStatus();
       loadAllHistory(currentHours);
       
-      // 定时刷新状态 (5秒)
-      statusTimer = setInterval(fetchCurrentStatus, 5000);
+      // 定时刷新状态 (1分钟)
+      statusTimer = setInterval(fetchCurrentStatus, 60000);
       
       // 定时刷新历史数据 (1分钟)
       historyTimer = setInterval(() => loadAllHistory(currentHours), 60000);

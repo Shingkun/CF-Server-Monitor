@@ -1096,7 +1096,7 @@ export async function handleDashboard(request, env, sys) {
       } catch (e) {
         console.log('[INFO] Refresh pending...');
       }
-    }, 5000);
+    }, 60000);
   </script>
   ${sys.custom_script || ''}
 </body>
