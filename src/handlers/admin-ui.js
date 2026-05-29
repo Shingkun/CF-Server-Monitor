@@ -1,6 +1,7 @@
 import { checkAuth, authResponse } from '../middleware/auth.js';
 import { formatBytes } from '../utils/format.js';
 import { getThemeStyles, getFooterHtml } from '../themes/styles.js';
+import { getLatestMetricsForAllServers } from '../database/schema.js';
 
 export async function handleAdminUI(request, env, sys) {
   if (!checkAuth(request, env)) {
@@ -15,14 +16,26 @@ export async function handleAdminUI(request, env, sys) {
     'SELECT id, name, last_updated, server_group, price, expire_date, bandwidth, traffic_limit, country, is_hidden, sort_order FROM servers ORDER BY sort_order ASC'
   ).all();
   
+  // 获取所有服务器的最新指标（用于判断在线状态）
+  const latestMetricsMap = await getLatestMetricsForAllServers(env.DB);
+  
   const now = Date.now();
+  const ONLINE_THRESHOLD = 300000;
   
   // 生成服务器列表行
   let trs = '';
   if (results && results.length > 0) {
     for (const s of results) {
-      const lastUpdated = new Date(s.last_updated).getTime();
-      const isOnline = (now - lastUpdated) < 300000;
+      const latestMetrics = latestMetricsMap.get(s.id);
+      
+      let lastUpdated = 0;
+      if (latestMetrics) {
+        lastUpdated = latestMetrics.timestamp;
+      } else {
+        lastUpdated = new Date(s.last_updated).getTime();
+      }
+      
+      const isOnline = (now - lastUpdated) < ONLINE_THRESHOLD;
       const status = isOnline 
         ? '<span style="color:var(--accent-green); font-weight:bold;">● ONLINE</span>' 
         : '<span style="color:var(--accent-red); font-weight:bold;">● OFFLINE</span>';

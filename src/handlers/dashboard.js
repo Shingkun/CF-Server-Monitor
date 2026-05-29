@@ -85,7 +85,7 @@ export async function handleServersAPI(request, env, sys) {
     
     if (latestMetrics) {
       lastUpdated = latestMetrics.timestamp;
-      isOnline = (now - lastUpdated) < 120000;
+      isOnline = (now - lastUpdated) < 300000;
       
       server.cpu = latestMetrics.cpu || 0;
       server.ram = latestMetrics.ram || 0;
@@ -111,7 +111,7 @@ export async function handleServersAPI(request, env, sys) {
       server.last_updated = lastUpdated;
     } else {
       lastUpdated = new Date(server.last_updated).getTime();
-      isOnline = (now - lastUpdated) < 120000;
+      isOnline = (now - lastUpdated) < 300000;
     }
     
     if (isOnline) {
@@ -908,7 +908,7 @@ export async function handleDashboard(request, env, sys) {
         
         for (const server of grpServers) {
           const lastUpdated = new Date(server.last_updated).getTime();
-          const isOnline = (now - lastUpdated) < 120000;
+          const isOnline = (now - lastUpdated) < 300000;
           const statusColor = isOnline ? 'var(--accent-green)' : 'var(--accent-red)';
           const statusText = isOnline ? 'ONLINE' : 'OFFLINE';
           const cpu = parseFloat(server.cpu || 0).toFixed(1);
@@ -987,7 +987,7 @@ export async function handleDashboard(request, env, sys) {
       let html = '';
       for (const server of servers) {
         const lastUpdated = new Date(server.last_updated).getTime();
-        const isOnline = (now - lastUpdated) < 120000;
+        const isOnline = (now - lastUpdated) < 300000;
         const statusColor = isOnline ? 'var(--accent-green)' : 'var(--accent-red)';
         const cpu = parseFloat(server.cpu || 0).toFixed(1);
         const ram = parseFloat(server.ram || 0).toFixed(1);

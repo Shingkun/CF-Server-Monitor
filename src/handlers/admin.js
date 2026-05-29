@@ -1,5 +1,6 @@
 import { checkAuth, authResponse } from '../middleware/auth.js';
 import { clearNotificationSettingsCache } from '../services/notification.js';
+import { getLatestMetricsForAllServers } from '../database/schema.js';
 
 function isValidUUID(id) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
@@ -173,7 +174,11 @@ export async function handleAdminAPI(request, env, sys) {
         'SELECT id, name, last_updated, country, cpu, ram, disk, net_in_speed, net_out_speed FROM servers'
       ).all();
       
+      // 获取所有服务器的最新指标（用于判断在线状态和获取最新数据）
+      const latestMetricsMap = await getLatestMetricsForAllServers(env.DB);
+      
       const now = Date.now();
+      const ONLINE_THRESHOLD = 300000;
       const stats = {
         total: servers.length,
         online: 0,
@@ -186,14 +191,34 @@ export async function handleAdminAPI(request, env, sys) {
       };
       
       servers.forEach(s => {
-        const lastUpdated = new Date(s.last_updated).getTime();
-        if ((now - lastUpdated) < 300000) {
+        const latestMetrics = latestMetricsMap.get(s.id);
+        
+        let lastUpdated = 0;
+        let cpu = 0, ram = 0, disk = 0, netInSpeed = 0, netOutSpeed = 0;
+        
+        if (latestMetrics) {
+          lastUpdated = latestMetrics.timestamp;
+          cpu = latestMetrics.cpu || 0;
+          ram = latestMetrics.ram || 0;
+          disk = latestMetrics.disk || 0;
+          netInSpeed = latestMetrics.net_in_speed || 0;
+          netOutSpeed = latestMetrics.net_out_speed || 0;
+        } else {
+          lastUpdated = new Date(s.last_updated).getTime();
+          cpu = parseFloat(s.cpu) || 0;
+          ram = parseFloat(s.ram) || 0;
+          disk = parseFloat(s.disk) || 0;
+          netInSpeed = parseFloat(s.net_in_speed) || 0;
+          netOutSpeed = parseFloat(s.net_out_speed) || 0;
+        }
+        
+        if ((now - lastUpdated) < ONLINE_THRESHOLD) {
           stats.online++;
-          stats.total_cpu += parseFloat(s.cpu) || 0;
-          stats.total_ram += parseFloat(s.ram) || 0;
-          stats.total_disk += parseFloat(s.disk) || 0;
-          stats.total_net_in += parseFloat(s.net_in_speed) || 0;
-          stats.total_net_out += parseFloat(s.net_out_speed) || 0;
+          stats.total_cpu += cpu;
+          stats.total_ram += ram;
+          stats.total_disk += disk;
+          stats.total_net_in += netInSpeed;
+          stats.total_net_out += netOutSpeed;
         } else {
           stats.offline++;
         }

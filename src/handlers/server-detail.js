@@ -49,7 +49,7 @@ export async function handleServerDetail(request, env, sys, viewId) {
     server.disk_used = latestMetrics.disk_used || 0;
   }
   
-  const isOnline = (now - serverLastUpdated) < 120000;
+  const isOnline = (now - serverLastUpdated) < 300000;
   
   const cCode = (server.country || 'xx').toLowerCase();
   const flagHtml = cCode !== 'xx' 
@@ -1320,7 +1320,7 @@ export async function handleServerDetail(request, env, sys, viewId) {
         const data = await res.json();
         
         const lastUpdatedTime = new Date(data.last_updated).getTime();
-        const isOnline = (Date.now() - lastUpdatedTime) < 120000;
+        const isOnline = (Date.now() - lastUpdatedTime) < 300000;
         const badge = document.getElementById('head-status');
         badge.innerHTML = \`<span class="pulse-dot \${isOnline ? 'online' : 'offline'}"></span>\${isOnline ? 'ONLINE' : 'OFFLINE'}\`;
         badge.className = 'status-badge ' + (isOnline ? 'online' : 'offline');
