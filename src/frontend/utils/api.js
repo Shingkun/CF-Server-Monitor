@@ -64,13 +64,6 @@ export const createLiveSocket = (subscribe, handlers = {}, apiIndex = 0) => {
       if (msg.type === 'update' && typeof onUpdate === 'function') {
         onUpdate({ serverId: msg.serverId, data: msg.data })
       }
-      if (msg.type === 'batchUpdate' && typeof onUpdate === 'function') {
-        if (Array.isArray(msg.updates)) {
-          for (const u of msg.updates) {
-            onUpdate({ serverId: u.serverId, data: u.data })
-          }
-        }
-      }
       if (typeof onMessage === 'function') onMessage(msg)
     })
 

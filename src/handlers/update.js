@@ -15,8 +15,8 @@ function buildPayloadForBroadcast(id, metrics, extra = {}) {
   return payload;
 }
 
-// 批量推送：10秒窗口内合并向 DO 推送一次，减少请求次数
-const BATCH_WINDOW = 10000;
+// 批量推送：5秒窗口内合并向 DO 推送一次，减少请求次数
+const BATCH_WINDOW = 5000;
 let batchQueue = new Map();
 let flushingPromise = null;
 

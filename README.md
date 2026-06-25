@@ -27,7 +27,7 @@ cat /etc/config/cf-probe/config.conf
 <details>
 <summary>更新记录</summary>
 
-- V2.7.5 新增批量推送入口，每10秒批量接收多个服务器更新，减少 DO 请求次数。每5秒批量发送websocket消息，减少Websocket连接次数。
+- V2.7.5 DO WebSocket改成 DO WebSocket Hibernation基本剔除DO Duration消耗，新增批量推送入口，每5秒批量接收多个服务器更新，减少 DO 请求次数。
 - V2.7.4 添加允许跨域配置，为后续版本额外功能做铺垫，前端加上跨域配置，修改成HASH模式，修改country为region，数据库自动维护
 - V2.7.3.3 压缩定时任务4个为2个，避免超出免费额度
 - V2.7.3.2 合并通知告警，其他代码逻辑优化
